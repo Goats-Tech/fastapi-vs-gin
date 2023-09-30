@@ -1,0 +1,16 @@
+services:
+    app:
+        build: .
+        ports:
+            - "5555:5555"
+        depends_on:
+            - database
+    database:
+        image: postgres:15-alpine
+        restart: always
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: postgres
+        ports:
+            - "5432:5432"
