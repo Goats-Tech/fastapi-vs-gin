@@ -13,7 +13,7 @@ type Product struct {
 }
 
 func Connect() (*gorm.DB, error) {
-	dsn := "host=gin-database-1 port=5432 user=postgres dbname=postgres password=postgres sslmode=disable"
+	dsn := "host=fastapi-vs-gin-database-1 port=5432 user=postgres dbname=gin password=postgres sslmode=disable"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {

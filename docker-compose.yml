@@ -1,0 +1,46 @@
+services:
+  database:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    expose:
+      - "5432"
+    volumes:
+      - ./init-database.sh:/docker-entrypoint-initdb.d/init-database.sh
+
+  gin:
+    build: gin
+    ports:
+      - "5555:5555"
+    depends_on:
+      - database
+
+  fastapi-migrate:
+    build: fast_api
+    environment:
+      DB_HOST: database
+      DB_NAME: fastapi
+      DB_PASSWORD: postgres
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+    depends_on:
+      - database
+    command:
+      - alembic
+      - upgrade
+      - head
+
+  fastapi:
+    build: fast_api
+    ports:
+      - "5554:4444"
+    environment:
+        DB_HOST: database
+        DB_NAME: fastapi
+        DB_PASSWORD: postgres
+        DB_PORT: 5432
+        DB_USERNAME: postgres
+    depends_on:
+      - fastapi-migrate
