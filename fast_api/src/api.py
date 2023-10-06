@@ -2,10 +2,18 @@ from fastapi import FastAPI, Depends
 from pydantic import BaseModel
 from sqlalchemy.engine import Connection
 
-from src.db import db_connection
+from src.db import db_connection, db_engine
 from src.db.helpers import db_read, db_write
 
 app = FastAPI()
+
+
+@app.on_event("shutdown")
+def shutdown():
+    """
+    Closes the database connection when the FastAPI application is shut down.
+    """
+    db_engine.dispose()
 
 
 class Product(BaseModel):
