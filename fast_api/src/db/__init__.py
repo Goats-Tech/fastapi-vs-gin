@@ -1,4 +1,5 @@
 from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 from src.config import DatabaseConfig
 
@@ -10,8 +11,11 @@ db_url = f"postgresql+psycopg://{conn_string}"
 
 db_engine = create_engine(db_url)
 
+DBSession = sessionmaker(autocommit=False, autoflush=False, bind=db_engine)
 
 def db_connection():
-    conn = db_engine.engine.connect()
-    yield conn
-    conn.close()
+    session = DBSession()
+    try:
+        yield session
+    finally:
+        session.close()
