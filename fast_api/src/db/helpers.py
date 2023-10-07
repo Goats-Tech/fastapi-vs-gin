@@ -15,15 +15,15 @@ def random_float(_min: int = 0, _max: int = 9):
     return random.uniform(_min, _max)
 
 
-def db_read(db: Connection):
+async def db_read(db: Connection):
     q = products.select()
-    return db.execute(q).all()
+    return await db.execute(q).all()
 
 
-def db_write(db: Connection):
+async def db_write(db: Connection):
     data = products.insert().values(
         name=random_string(),
         value=random_float(),
     )
-    db.execute(data)
-    db.commit()
+    await db.execute(data)
+    await db.commit()

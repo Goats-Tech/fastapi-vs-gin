@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends
 from pydantic import BaseModel
-from sqlalchemy.engine import Connection
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.db import db_connection, db_engine
 from src.db.helpers import db_read, db_write
@@ -22,10 +22,10 @@ class Product(BaseModel):
 
 
 @app.get("/read", response_model=list[Product])
-def read(db: Connection = Depends(db_connection)):
-    return db_read(db)
+async def read(db: AsyncSession = Depends(db_connection)):
+    return await db_read(db)
 
 
 @app.post("/write")
-def write(db: Connection = Depends(db_connection)):
-    return db_write(db)
+async def write(db: AsyncSession = Depends(db_connection)):
+    return await db_write(db)
