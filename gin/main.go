@@ -1,47 +1,16 @@
 package main
 
 import (
-	"gin/db"
-	"gin/random"
+	"context"
+	"gin/mygorm"
+	"gin/sqlc"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
-	"net/http"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type Product struct {
-	gorm.Model
-	Name  string
-	Value float64
-}
-
-func Read(c *gin.Context, db *gorm.DB) {
-	var product []Product
-	result := db.Find(&product)
-
-	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": result.Error.Error()})
-		return
-	}
-
-	// Return the product as JSON
-	c.JSON(http.StatusOK, product)
-}
-
-func Write(c *gin.Context, db *gorm.DB) {
-	name := random.GenerateRandomString(10)
-	value := random.RandFloat()
-
-	product := Product{Name: name, Value: value}
-	db.Create(&product)
-
-	c.JSON(http.StatusOK, product)
-}
-
 func main() {
-	dbConn, err := db.Connect()
-	if err != nil {
-		return
-	}
+	useGorm := true
+	connString := "postgresql://postgres:secret@fastapi-vs-gin-database-1:5432/gin?sslmode=disable"
 
 	server := gin.Default()
 	server.GET("/ping", func(context *gin.Context) {
@@ -49,14 +18,40 @@ func main() {
 			"message": "pong",
 		})
 	})
-	server.GET("/read", func(c *gin.Context) {
-		Read(c, dbConn)
-	})
-	server.POST("/write", func(c *gin.Context) {
-		Write(c, dbConn)
-	})
 
-	err = server.Run(":5555")
+	if useGorm {
+		dbConn, err := mygorm.Connect(connString)
+		if err != nil {
+			return
+		}
+
+		server.GET("/read", func(c *gin.Context) {
+			mygorm.Read(c, dbConn)
+		})
+		server.POST("/write", func(c *gin.Context) {
+			mygorm.Write(c, dbConn)
+		})
+	} else {
+		dbConn, err := pgxpool.New(context.Background(), connString)
+		if err != nil {
+			return
+		}
+
+		server.GET("/read", func(c *gin.Context) {
+			_, err := sqlc.New(dbConn).Read(c, 100)
+			if err != nil {
+				return
+			}
+		})
+		server.POST("/write", func(c *gin.Context) {
+			_, err := sqlc.New(dbConn).Read(c, 100)
+			if err != nil {
+				return
+			}
+		})
+	}
+
+	err := server.Run(":5555")
 	if err != nil {
 		return
 	}
