@@ -12,7 +12,7 @@ type Product struct {
 	Value float64
 }
 
-func Connect() (*gorm.DB, error) {
+func GormConnect() (*gorm.DB, error) {
 	dsn := "host=fastapi-vs-gin-database-1 port=5432 user=postgres dbname=gin password=postgres sslmode=disable"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
@@ -21,12 +21,12 @@ func Connect() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	Migrate(db)
+	GormMigrate(db)
 
 	return db, nil
 }
 
-func Migrate(db *gorm.DB) {
+func GormMigrate(db *gorm.DB) {
 	err := db.AutoMigrate(&Product{})
 	if err != nil {
 		return

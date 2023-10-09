@@ -16,7 +16,7 @@ def random_float(_min: int = 0, _max: int = 9):
 
 
 def db_read(db: Connection):
-    q = products.select()
+    q = products.select().limit(100)
     return db.execute(q).all()
 
 
