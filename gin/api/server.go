@@ -33,8 +33,8 @@ func NewServer() *Server {
 	}
 
 	// Accounts routes
-	server.Router.POST("/write", server.write)
-	server.Router.GET("/read", server.read)
+	server.Router.POST("", server.write)
+	server.Router.GET("", server.read)
 
 	return server
 }
